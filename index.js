@@ -104,7 +104,7 @@ const main = async () => {
     console.log(typeof failOnEOCP);
     console.log(generateCurrentEOCP());
 
-    if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === true) {
+    if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === "true") {
       core.setFailed("EOCP is in current Quarter");
     }
   } catch (error) {

@@ -25,6 +25,19 @@ const main = async () => {
      **/
     const octokit = new github.getOctokit(token);
 
+    const ui5VersionsAndPatches = async () => {
+      const { data } = await axios.get(
+        "https://sapui5.hana.ondemand.com/versionoverview.json",
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      return data;
+    };
+
     const getUi5Version = (raw) => {
       let n = raw.match(
         /https:\/\/sapui5.hana.ondemand.com\/(.*)\/resources\//i
@@ -37,6 +50,11 @@ const main = async () => {
       return sapVersion;
     };
 
+    const getEOCP = async (version) => {
+      const { patches, version } = await ui5VersionsAndPatches();
+      return patches.filter((el) => el.version === version)[0];
+    };
+
     const { data } = await octokit.rest.repos.getContent({
       mediaType: {
         format: "raw",
@@ -47,8 +65,9 @@ const main = async () => {
     });
 
     const ui5Version = getUi5Version(data);
+    const eocp = getEOCP(ui5Version);
 
-    console.log(ui5Version);
+    console.log({ ui5Version, eocp });
     /**
      * Create a comment on the PR with the information we compiled from the
      * list of changed files.
@@ -59,6 +78,7 @@ const main = async () => {
       issue_number: pr_number,
       body: `
         UI5Version used: ${ui5Version}
+        EOCP: ${JSON.stringify(eocp)}
       `,
     });
   } catch (error) {

@@ -15,6 +15,8 @@ const main = async () => {
     const path = core.getInput("pathToIndex", { required: true });
     const failOnEOCP = core.getInput("failOnEOCP", { required: true });
 
+    console.log({ path, failOnEOCP });
+
     /**
      * Now we need to create an instance of Octokit which will use to call
      * GitHub's REST API endpoints.
@@ -97,6 +99,10 @@ const main = async () => {
         EOCP: ${JSON.stringify(eocp)}
       `,
     });
+
+    console.log(eocp.eocp);
+    console.log(failOnEOCP);
+    console.log(generateCurrentEOCP());
 
     if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === true) {
       core.setFailed("EOCP is in current Quarter");

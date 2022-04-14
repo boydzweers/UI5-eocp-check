@@ -101,7 +101,7 @@ const main = async () => {
     });
 
     console.log(eocp.eocp);
-    console.log(failOnEOCP);
+    console.log(typeof failOnEOCP);
     console.log(generateCurrentEOCP());
 
     if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === true) {

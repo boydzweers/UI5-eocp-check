@@ -66,7 +66,7 @@ const main = async () => {
     });
 
     const ui5Version = getUi5Version(data);
-    const eocp = getEOCP(ui5Version);
+    const eocp = await getEOCP(ui5Version);
 
     console.log({ ui5Version, eocp });
     /**

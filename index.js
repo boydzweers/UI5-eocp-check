@@ -26,7 +26,7 @@ const main = async () => {
     const octokit = new github.getOctokit(token);
 
     const getUi5Version = (raw) => {
-      let n = html.match(
+      let n = raw.match(
         /https:\/\/sapui5.hana.ondemand.com\/(.*)\/resources\//i
       );
       let sapVersion = null;

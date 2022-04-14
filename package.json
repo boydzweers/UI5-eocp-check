@@ -19,6 +19,7 @@
   "homepage": "https://github.com/boydzweers/UI5-eocp-check#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "@actions/github": "^5.0.1"
+    "@actions/github": "^5.0.1",
+    "axios": "^0.26.1"
   }
 }

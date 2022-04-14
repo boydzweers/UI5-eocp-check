@@ -11,6 +11,9 @@ const main = async () => {
     const repo = core.getInput("repo", { required: true });
     const pr_number = core.getInput("pr_number", { required: true });
     const token = core.getInput("token", { required: true });
+    const path = core.getInput("path_to_index", { required: true });
+
+    console.log(path);
 
     /**
      * Now we need to create an instance of Octokit which will use to call
@@ -22,79 +25,30 @@ const main = async () => {
      **/
     const octokit = new github.getOctokit(token);
 
-    /**
-     * We need to fetch the list of files that were changes in the Pull Request
-     * and store them in a variable.
-     * We use octokit.paginate() to automatically loop over all the pages of the
-     * results.
-     * Reference: https://octokit.github.io/rest.js/v18#pulls-list-files
-     */
-    const { data: changedFiles } = await octokit.rest.pulls.listFiles({
-      owner,
-      repo,
-      pull_number: pr_number,
-    });
+    const getUi5Version = (raw) => {
+      let n = html.match(
+        /https:\/\/sapui5.hana.ondemand.com\/(.*)\/resources\//i
+      );
+      let sapVersion = null;
+      if (n && n.length > 1 && n[1]) {
+        sapVersion = n[1];
+      }
 
-    /**
-     * Contains the sum of all the additions, deletions, and changes
-     * in all the files in the Pull Request.
-     **/
-    let diffData = {
-      additions: 0,
-      deletions: 0,
-      changes: 0,
+      return sapVersion;
     };
 
-    // Reference for how to use Array.reduce():
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce
-    diffData = changedFiles.reduce((acc, file) => {
-      acc.additions += file.additions;
-      acc.deletions += file.deletions;
-      acc.changes += file.changes;
-      return acc;
-    }, diffData);
+    const { data } = await octokit.rest.repos.getContent({
+      mediaType: {
+        format: "raw",
+      },
+      owner: owner,
+      repo: repo,
+      path: path,
+    });
 
-    /**
-     * Loop over all the files changed in the PR and add labels according
-     * to files types.
-     **/
-    for (const file of changedFiles) {
-      /**
-       * Add labels according to file types.
-       */
-      const fileExtension = file.filename.split(".").pop();
-      switch (fileExtension) {
-        case "md":
-          await octokit.rest.issues.addLabels({
-            owner,
-            repo,
-            issue_number: pr_number,
-            labels: ["markdown"],
-          });
-        case "js":
-          await octokit.rest.issues.addLabels({
-            owner,
-            repo,
-            issue_number: pr_number,
-            labels: ["javascript"],
-          });
-        case "yml":
-          await octokit.rest.issues.addLabels({
-            owner,
-            repo,
-            issue_number: pr_number,
-            labels: ["yaml"],
-          });
-        case "yaml":
-          await octokit.rest.issues.addLabels({
-            owner,
-            repo,
-            issue_number: pr_number,
-            labels: ["yaml"],
-          });
-      }
-    }
+    const ui5Version = getUi5Version(data);
 
+    console.log(ui5Version);
     /**
      * Create a comment on the PR with the information we compiled from the
      * list of changed files.
@@ -104,10 +58,7 @@ const main = async () => {
       repo,
       issue_number: pr_number,
       body: `
-        Pull Request #${pr_number} has been updated with: \n
-        - ${diffData.changes} changes \n
-        - ${diffData.additions} additions \n
-        - ${diffData.deletions} deletions \n
+        UI5Version used: ${ui5Version}
       `,
     });
   } catch (error) {

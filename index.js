@@ -10,7 +10,7 @@ const main = async () => {
      **/
     const owner = core.getInput("owner", { required: true });
     const repo = core.getInput("repo", { required: true });
-    const prNumber = core.getInput("prNumber", { required: true });
+    const issueNumber = core.getInput("issueNumber", { required: true });
     const token = core.getInput("token", { required: true });
     const path = core.getInput("pathToIndex", { required: true });
     const failOnEOCP = core.getInput("failOnEOCP", { required: true });
@@ -83,9 +83,64 @@ const main = async () => {
     });
 
     const ui5Version = getUi5Version(data);
-    const eocp = await getEOCP(ui5Version);
+    const { eocp, version } = await getEOCP(ui5Version);
 
-    console.log({ ui5Version, eocp });
+    let commentBody = null;
+
+    const EOCPcheck = (eocp) => {
+      const currentYear = new Date().getUTCFullYear();
+      const currentQuarter = getQuarter();
+      const [quarter, year] = eocp.split("/");
+      eocpQuerter = quarter.replace("Q", "");
+
+      let message = null;
+      let code = null;
+
+      if (year < currentYear) {
+        code = 1;
+        message = "You need to update, eocp was last year of earlier";
+      } else if (year === currentYear && quarter < currentQuarter) {
+        code = 2;
+        message = "You need to update, eocp was one or more quarters back";
+      } else if (year === currentYear && quarter === currentQuarter) {
+        code = 3;
+        message = "This quarter you need to update";
+      } else if (year === currentYear && quarter > currentQuarter) {
+        code = 4;
+        message = "You will need to update in de near future";
+      } else if (year > currentYear) {
+        code = 5;
+        message = "No need to worry";
+      }
+
+      return { code, message };
+    };
+
+    const { code, message } = EOCPcheck(eocp);
+
+    if ([1, 2].includes(code)) {
+      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
+            - UI5 version used in project: ${ui5Version} :worried:
+            - EOCP of this version: ${eocp}
+
+            - ${message}
+        `;
+    } else if ([3, 4].includes(code)) {
+      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
+            - UI5 version used in project: ${ui5Version}
+            - EOCP of this version: ${eocp}
+
+            - ${message}
+        `;
+    } else if ([5].includes(code)) {
+      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
+            - UI5 version used in project: ${ui5Version}
+            - EOCP of this version: ${eocp.eocp}
+
+            - ${message}
+        `;
+    }
+
     /**
      * Create a comment on the PR with the information we compiled from the
      * list of changed files.
@@ -93,19 +148,12 @@ const main = async () => {
     await octokit.rest.issues.createComment({
       owner,
       repo,
-      issue_number: prNumber,
-      body: `
-        UI5Version used: ${ui5Version}
-        EOCP: ${JSON.stringify(eocp)}
-      `,
+      issue_number: issueNumber,
+      body: commentBody,
     });
 
-    console.log(eocp.eocp);
-    console.log(typeof failOnEOCP);
-    console.log(generateCurrentEOCP());
-
-    if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === "true") {
-      core.setFailed("EOCP is in current Quarter");
+    if ([1, 2].includes(code) && failOnEOCP === true) {
+      core.setFailed(message);
     }
   } catch (error) {
     core.setFailed(error.message);

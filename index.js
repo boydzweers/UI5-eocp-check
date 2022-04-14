@@ -10,11 +10,10 @@ const main = async () => {
      **/
     const owner = core.getInput("owner", { required: true });
     const repo = core.getInput("repo", { required: true });
-    const pr_number = core.getInput("pr_number", { required: true });
+    const prNumber = core.getInput("prNumber", { required: true });
     const token = core.getInput("token", { required: true });
-    const path = core.getInput("path_to_index", { required: true });
-
-    console.log(path);
+    const path = core.getInput("pathToIndex", { required: true });
+    const failOnEOCP = core.getInput("failOnEOCP", { required: true });
 
     /**
      * Now we need to create an instance of Octokit which will use to call
@@ -25,6 +24,22 @@ const main = async () => {
      * https://octokit.github.io/rest.js/v18
      **/
     const octokit = new github.getOctokit(token);
+
+    /**
+     * January 1st - March 31st  = First Quarter
+     * April 1st - June 30th = Second Quarter
+     * July 1st - September 30th = Third Quarter
+     * October 1st - December 31st = Fourth Quarter
+     */
+    const getQuarter = (date = new Date()) => {
+      return Math.floor(date.getMonth() / 3 + 1);
+    };
+
+    const generateCurrentEOCP = () => {
+      const quarter = getQuarter();
+      const year = new Date().getUTCFullYear();
+      return `Q${quarter}/${year}`;
+    };
 
     const ui5VersionsAndPatches = async () => {
       const { data } = await axios.get(
@@ -76,12 +91,16 @@ const main = async () => {
     await octokit.rest.issues.createComment({
       owner,
       repo,
-      issue_number: pr_number,
+      issue_number: prNumber,
       body: `
         UI5Version used: ${ui5Version}
         EOCP: ${JSON.stringify(eocp)}
       `,
     });
+
+    if (eocp.eocp === generateCurrentEOCP() && failOnEOCP === true) {
+      core.setFailed("EOCP is in current Quarter");
+    }
   } catch (error) {
     core.setFailed(error.message);
   }

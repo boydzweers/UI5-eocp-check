@@ -7,14 +7,17 @@ inputs:
   repo:
     description: "The name of the repository"
     required: true
-  pr_number:
+  prNumber:
     description: "The number of the pull request"
     required: true
   token:
     description: "The token to use to access the GitHub API"
     required: true
-  path_to_index:
+  pathToIndex:
     description: "Path to index.html where the version is specified"
+    required: true
+  failOnEOCP:
+    description: "Make action fail if EOCP is in current Q"
     required: true
 runs:
   using: "node16"

@@ -51,7 +51,7 @@ const main = async () => {
     };
 
     const getEOCP = async (version) => {
-      const { patches, version } = await ui5VersionsAndPatches();
+      const { patches, versions } = await ui5VersionsAndPatches();
       return patches.filter((el) => el.version === version)[0];
     };
 

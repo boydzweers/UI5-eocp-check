@@ -61,17 +61,17 @@ const main = async () => {
     const { code, message } = EOCPcheck(eocp);
 
     if ([1, 2].includes(code)) {
-      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `###SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([3, 4].includes(code)) {
-      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `###SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([5].includes(code)) {
-      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `###SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;

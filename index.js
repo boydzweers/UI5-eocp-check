@@ -98,13 +98,11 @@ const main = async () => {
     //   body: commentBody,
     // });
 
-    console.log(octokit.rest);
-
-    await octokit.rest.issues.create(
-      repo,
-      "TEST",
-      "sdjhsbdgjkfhsdbgjhsdfbjghdsfbgjdhfrbg"
-    );
+    // await octokit.rest.issues.create(
+    //   repo,
+    //   "TEST",
+    //   "sdjhsbdgjkfhsdbgjhsdfbjghdsfbgjdhfrbg"
+    // );
 
     if ([1, 2].includes(code) && failOnEOCP === true) {
       core.setFailed(message);

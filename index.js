@@ -1,6 +1,11 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const axios = require("axios");
+const {
+  getQuarter,
+  generateCurrentEOCPFormat,
+  getUi5Version,
+  getEOCP,
+} = require("./utils");
 
 const main = async () => {
   try {
@@ -26,52 +31,6 @@ const main = async () => {
      * https://octokit.github.io/rest.js/v18
      **/
     const octokit = new github.getOctokit(token);
-
-    /**
-     * January 1st - March 31st  = First Quarter
-     * April 1st - June 30th = Second Quarter
-     * July 1st - September 30th = Third Quarter
-     * October 1st - December 31st = Fourth Quarter
-     */
-    const getQuarter = (date = new Date()) => {
-      return Math.floor(date.getMonth() / 3 + 1);
-    };
-
-    const generateCurrentEOCP = () => {
-      const quarter = getQuarter();
-      const year = new Date().getUTCFullYear();
-      return `Q${quarter}/${year}`;
-    };
-
-    const ui5VersionsAndPatches = async () => {
-      const { data } = await axios.get(
-        "https://sapui5.hana.ondemand.com/versionoverview.json",
-        {
-          headers: {
-            Accept: "application/json",
-          },
-        }
-      );
-
-      return data;
-    };
-
-    const getUi5Version = (raw) => {
-      let n = raw.match(
-        /https:\/\/sapui5.hana.ondemand.com\/(.*)\/resources\//i
-      );
-      let sapVersion = null;
-      if (n && n.length > 1 && n[1]) {
-        sapVersion = n[1];
-      }
-
-      return sapVersion;
-    };
-
-    const getEOCP = async (version) => {
-      const { patches, versions } = await ui5VersionsAndPatches();
-      return patches.filter((el) => el.version === version)[0];
-    };
 
     const { data } = await octokit.rest.repos.getContent({
       mediaType: {
@@ -126,17 +85,17 @@ const main = async () => {
     const { code, message } = EOCPcheck(eocp);
 
     if ([1, 2].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([3, 4].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([5].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;

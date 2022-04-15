@@ -11,11 +11,8 @@ const main = async () => {
   try {
     const owner = core.getInput("owner", { required: true });
     const repo = core.getInput("repo", { required: true });
-    const issueNumber = core.getInput("issueNumber", { required: true });
     const token = core.getInput("token", { required: true });
     const path = core.getInput("pathToIndex", { required: true });
-    const failOnEOCP = core.getInput("failOnEOCP", { required: true });
-
     const octokit = new github.getOctokit(token);
 
     const { data } = await octokit.rest.repos.getContent({
@@ -28,9 +25,9 @@ const main = async () => {
     });
 
     const ui5Version = getUi5Version(data);
-    const { eocp, version } = await getEOCP(ui5Version);
+    const { eocp } = await getEOCP(ui5Version);
 
-    let commentBody = null;
+    let issueBody = null;
 
     const EOCPcheck = (eocp) => {
       const currentYear = new Date().getUTCFullYear();
@@ -56,9 +53,6 @@ const main = async () => {
       } else if (Number(year) === currentYear && eocpQuerter > currentQuarter) {
         code = 4;
         message = "You will need to update in de near future.";
-      } else if (Number(year) > currentYear) {
-        code = 5;
-        message = "No need to worry.";
       }
 
       return { code, message };
@@ -67,17 +61,17 @@ const main = async () => {
     const { code, message } = EOCPcheck(eocp);
 
     if ([1, 2].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([3, 4].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
     } else if ([5].includes(code)) {
-      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
+      issueBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCPFormat()})
             The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
             ${message}
         `;
@@ -86,27 +80,10 @@ const main = async () => {
     await octokit.request("POST /repos/{owner}/{repo}/issues", {
       owner: owner,
       repo: repo,
-      title: "testtestetset",
-      body: "ksjudfgksdjbgksdfjhbg",
-      label: "EOCP",
+      title: "SAPUI5 Version",
+      body: issueBody,
+      labels: "EOCP",
     });
-
-    // await octokit.rest.issues.createComment({
-    //   owner,
-    //   repo,
-    //   issue_number: issueNumber,
-    //   body: commentBody,
-    // });
-
-    // await octokit.rest.issues.create(
-    //   repo,
-    //   "TEST",
-    //   "sdjhsbdgjkfhsdbgjhsdfbjghdsfbgjdhfrbg"
-    // );
-
-    if ([1, 2].includes(code) && failOnEOCP === true) {
-      core.setFailed(message);
-    }
   } catch (error) {
     core.setFailed(error);
   }

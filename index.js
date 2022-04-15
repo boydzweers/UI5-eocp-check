@@ -90,7 +90,7 @@ const main = async () => {
     //   body: commentBody,
     // });
 
-    console.log(octokit.rest.issues);
+    console.log(octokit.rest);
 
     await octokit.rest.issues.create(
       repo,

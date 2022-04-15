@@ -91,26 +91,29 @@ const main = async () => {
       const currentYear = new Date().getUTCFullYear();
       const currentQuarter = getQuarter();
       const [quarter, year] = eocp.split("/");
-      const eocpQuerter = quarter.replace("Q", "");
+      const eocpQuerter = Number(quarter.replace("Q", ""));
 
       console.log({ currentYear, currentQuarter, quarter, year, eocpQuerter });
 
       let message = null;
       let code = null;
 
-      if (year < currentYear) {
+      if (Number(year) < currentYear) {
         code = 1;
         message = "You need to update, eocp was last year of earlier";
-      } else if (year === currentYear && eocpQuerter < currentQuarter) {
+      } else if (Number(year) === currentYear && eocpQuerter < currentQuarter) {
         code = 2;
         message = "You need to update, eocp was one or more quarters back";
-      } else if (year === currentYear && eocpQuerter === currentQuarter) {
+      } else if (
+        Number(year) === currentYear &&
+        eocpQuerter === currentQuarter
+      ) {
         code = 3;
         message = "This quarter you need to update";
-      } else if (year === currentYear && eocpQuerter > currentQuarter) {
+      } else if (Number(year) === currentYear && eocpQuerter > currentQuarter) {
         code = 4;
         message = "You will need to update in de near future";
-      } else if (year > currentYear) {
+      } else if (Number(year) > currentYear) {
         code = 5;
         message = "No need to worry";
       }

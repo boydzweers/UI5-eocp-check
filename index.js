@@ -83,6 +83,14 @@ const main = async () => {
         `;
     }
 
+    await octokit.request("POST /repos/{owner}/{repo}/issues", {
+      owner: owner,
+      repo: repo,
+      title: "testtestetset",
+      body: "ksjudfgksdjbgksdfjhbg",
+      label: "EOCP",
+    });
+
     // await octokit.rest.issues.createComment({
     //   owner,
     //   repo,

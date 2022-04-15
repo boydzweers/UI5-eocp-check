@@ -126,25 +126,19 @@ const main = async () => {
     const { code, message } = EOCPcheck(eocp);
 
     if ([1, 2].includes(code)) {
-      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
-            - UI5 version used in project: ${ui5Version} :worried:
-            - EOCP of this version: ${eocp}
-
-            - ${message}
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+            The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
+            ${message}
         `;
     } else if ([3, 4].includes(code)) {
-      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
-            - UI5 version used in project: ${ui5Version}
-            - EOCP of this version: ${eocp}
-
-            - ${message}
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+            The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
+            ${message}
         `;
     } else if ([5].includes(code)) {
-      commentBody = `UI5 EOCP Check (${generateCurrentEOCP()})
-            - UI5 version used in project: ${ui5Version}
-            - EOCP of this version: ${eocp.eocp}
-
-            - ${message}
+      commentBody = `SAPUI5 End of Cloud Provisioning Check (${generateCurrentEOCP()})
+            The version used is ${ui5Version}, and this version has a EOCP of ${eocp}
+            ${message}
         `;
     }
 

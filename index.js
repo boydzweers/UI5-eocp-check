@@ -92,7 +92,7 @@ const main = async () => {
 
     console.log(octokit.rest.issues);
 
-    await octokit.rest.issues.createIssue(
+    await octokit.rest.issues.create(
       repo,
       "TEST",
       "sdjhsbdgjkfhsdbgjhsdfbjghdsfbgjdhfrbg"

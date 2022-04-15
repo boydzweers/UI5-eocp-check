@@ -82,7 +82,7 @@ const main = async () => {
       repo: repo,
       title: "SAPUI5 Version",
       body: issueBody,
-      labels: "EOCP",
+      labels: ["EOCP"],
     });
   } catch (error) {
     core.setFailed(error);

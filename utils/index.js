@@ -38,7 +38,7 @@ const getEOCP = async (version) => {
   return patches.filter((el) => el.version === version)[0];
 };
 
-modules.exports = {
+module.exports = {
   getQuarter,
   generateCurrentEOCPFormat,
   getUi5Version,
